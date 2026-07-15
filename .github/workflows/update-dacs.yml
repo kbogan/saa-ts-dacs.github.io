@@ -1,0 +1,22 @@
+name: Update DACS Website
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-dacs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout website repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Update DACS submodule
+        run: |
+          git submodule update --remote --recursive
+
+      - name: Show changes
+        run: |
+          git status
