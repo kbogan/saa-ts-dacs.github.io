@@ -3,8 +3,12 @@ name: Update DACS Website
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-dacs:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     steps:
@@ -12,6 +16,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Update DACS submodule
         run: |
@@ -20,3 +25,16 @@ jobs:
       - name: Show changes
         run: |
           git status
+          git diff
+
+      - name: Commit submodule update
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add dacs
+          git commit -m "Update DACS content" || echo "No DACS updates"
+
+      - name: Push update
+        run: |
+          git push origin master
