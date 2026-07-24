@@ -18,23 +18,48 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
       - name: Update DACS submodule
         run: |
           git submodule update --remote --recursive
+
+      - name: Update website version
+        run: |
+          VERSION=$(git -C dacs describe --tags --abbrev=0)
+          echo "Latest DACS version: $VERSION"
+
+          sed -i "s/^subtitle:.*/subtitle: \"$VERSION\"/" _config.yml
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Build Jekyll site
+        run: bundle exec jekyll build
+
+      - name: Upload generated site
+        uses: actions/upload-artifact@v4
+        with:
+          name: dacs-website
+          path: _site
 
       - name: Show changes
         run: |
           git status
           git diff
 
-      - name: Commit submodule update
+      - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add dacs
-          git commit -m "Update DACS content" || echo "No DACS updates"
+          VERSION=$(git -C dacs describe --tags --abbrev=0)
+
+          git add dacs _config.yml
+          git commit -m "Update DACS to $VERSION" || echo "No DACS updates"
 
       - name: Push update
-        run: |
-          git push origin master
+        run: git push origin master
