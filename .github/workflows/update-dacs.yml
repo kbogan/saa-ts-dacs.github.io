@@ -36,9 +36,6 @@ jobs:
 
           sed -i "s/^subtitle:.*/subtitle: \"$VERSION\"/" _config.yml
 
-      - name: Install dependencies
-        run: bundle install
-
       - name: Build Jekyll site
         run: bundle exec jekyll build
 
